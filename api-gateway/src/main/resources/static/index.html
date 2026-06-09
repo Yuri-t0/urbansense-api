@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UrbanSense</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --c1:#7C3AED;--c2:#06B6D4;--c3:#F59E0B;
+  --bg:#080B14;--bg2:#0D1120;--bg3:#111827;
+  --card:#0F1729;--card2:#131E33;
+  --border:rgba(124,58,237,0.15);--border2:rgba(6,182,212,0.2);
+  --text:#F0F4FF;--text2:#94A3B8;--text3:#475569;
+  --font:'Inter',sans-serif;--mono:'JetBrains Mono',monospace;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--font);overflow-x:hidden}
+
+/* ── NOISE TEXTURE ── */
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");pointer-events:none;z-index:0;opacity:0.4}
+
+/* ── GLOW ORBS ── */
+.orb{position:fixed;border-radius:50%;filter:blur(120px);pointer-events:none;z-index:0}
+.orb1{width:600px;height:600px;background:rgba(124,58,237,0.12);top:-200px;left:-100px}
+.orb2{width:500px;height:500px;background:rgba(6,182,212,0.08);bottom:-150px;right:-100px}
+
+/* ── NAV ── */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:16px 32px;display:flex;align-items:center;justify-content:space-between;background:rgba(8,11,20,0.8);backdrop-filter:blur(20px);border-bottom:1px solid var(--border)}
+.nav-logo{display:flex;align-items:center;gap:10px}
+.nav-logo svg{width:32px;height:32px}
+.nav-logo-text{font-size:18px;font-weight:800;letter-spacing:-0.03em}
+.nav-logo-text span{background:linear-gradient(135deg,var(--c1),var(--c2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.nav-badge{display:flex;align-items:center;gap:6px;background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.25);color:#4ADE80;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:600;letter-spacing:0.06em}
+.nav-badge::before{content:'';width:6px;height:6px;border-radius:50%;background:#4ADE80;animation:blink 2s infinite}
+@keyframes blink{0%,100%{opacity:1;box-shadow:0 0 6px #4ADE80}50%{opacity:0.3;box-shadow:none}}
+.nav-links{display:flex;gap:8px}
+.nav-links a{padding:7px 16px;border-radius:8px;font-size:13px;font-weight:600;text-decoration:none;transition:all 0.2s;color:var(--text2);border:1px solid transparent}
+.nav-links a:hover{background:rgba(255,255,255,0.06);color:var(--text);border-color:var(--border)}
+.nav-links .nav-cta{background:var(--c1);color:#fff;border-color:var(--c1)}
+.nav-links .nav-cta:hover{background:#6D28D9;border-color:#6D28D9;transform:translateY(-1px)}
+
+/* ── HERO ── */
+.hero{position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:120px 24px 80px}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:8px;background:rgba(124,58,237,0.1);border:1px solid rgba(124,58,237,0.3);color:#A78BFA;padding:6px 16px;border-radius:20px;font-size:12px;font-weight:600;letter-spacing:0.08em;margin-bottom:28px;text-transform:uppercase}
+.hero-eyebrow svg{width:14px;height:14px}
+.hero h1{font-size:clamp(3rem,8vw,6rem);font-weight:900;letter-spacing:-0.04em;line-height:0.95;margin-bottom:24px}
+.hero h1 .word1{display:block;color:var(--text)}
+.hero h1 .word2{display:block;background:linear-gradient(135deg,var(--c1) 0%,var(--c2) 60%,#22D3EE 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero-sub{font-size:clamp(1rem,2vw,1.2rem);color:var(--text2);max-width:520px;line-height:1.7;margin-bottom:40px}
+.hero-sub strong{color:var(--text);font-weight:600}
+.hero-actions{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-bottom:64px}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:13px 24px;border-radius:12px;font-size:14px;font-weight:700;text-decoration:none;transition:all 0.2s;cursor:pointer;border:none}
+.btn-violet{background:linear-gradient(135deg,var(--c1),#5B21B6);color:#fff;box-shadow:0 0 30px rgba(124,58,237,0.3)}
+.btn-violet:hover{transform:translateY(-2px);box-shadow:0 0 40px rgba(124,58,237,0.5)}
+.btn-cyan{background:rgba(6,182,212,0.1);color:var(--c2);border:1px solid rgba(6,182,212,0.3)}
+.btn-cyan:hover{background:rgba(6,182,212,0.2);transform:translateY(-1px)}
+.btn-ghost{background:rgba(255,255,255,0.05);color:var(--text2);border:1px solid rgba(255,255,255,0.1)}
+.btn-ghost:hover{background:rgba(255,255,255,0.1);color:var(--text)}
+
+/* ── HERO STATS ── */
+.hero-stats{display:flex;gap:0;background:var(--card);border:1px solid var(--border);border-radius:20px;overflow:hidden}
+.hero-stat{padding:20px 36px;text-align:center;border-right:1px solid var(--border);position:relative}
+.hero-stat:last-child{border-right:none}
+.hs-num{font-size:2rem;font-weight:900;line-height:1;background:linear-gradient(135deg,var(--c1),var(--c2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hs-label{font-size:11px;color:var(--text3);letter-spacing:0.08em;text-transform:uppercase;margin-top:4px}
+
+/* ── SECTION ── */
+section{position:relative;z-index:1;padding:80px 24px}
+.container{max-width:1100px;margin:0 auto}
+.sec-label{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;color:var(--c2);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:12px}
+.sec-label::before{content:'';width:20px;height:2px;background:var(--c2);border-radius:2px}
+.sec-title{font-size:clamp(1.8rem,4vw,2.5rem);font-weight:800;letter-spacing:-0.03em;margin-bottom:8px}
+.sec-sub{color:var(--text2);font-size:1rem;line-height:1.7;max-width:520px}
+
+/* ── SERVICE CARDS ── */
+.services-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin-top:40px}
+.svc{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:28px;transition:all 0.3s;position:relative;overflow:hidden}
+.svc::after{content:'';position:absolute;inset:0;border-radius:20px;opacity:0;transition:opacity 0.3s}
+.svc:hover{transform:translateY(-4px);border-color:rgba(124,58,237,0.4)}
+.svc:hover::after{opacity:1;box-shadow:inset 0 0 60px rgba(124,58,237,0.04)}
+.svc-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px}
+.svc-icon{width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px}
+.svc-port{font-family:var(--mono);font-size:11px;color:var(--text3);background:rgba(255,255,255,0.04);border:1px solid var(--border);padding:4px 10px;border-radius:8px}
+.svc h3{font-size:1.1rem;font-weight:700;margin-bottom:8px}
+.svc-desc{font-size:13px;color:var(--text2);line-height:1.65;margin-bottom:20px}
+.svc-pills{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:20px}
+.pill{font-size:11px;font-weight:600;padding:3px 10px;border-radius:8px;letter-spacing:0.02em}
+.svc-btns{display:flex;gap:8px}
+.svc-btn{flex:1;text-align:center;padding:8px 0;border-radius:10px;text-decoration:none;font-size:12px;font-weight:600;transition:all 0.2s;border:1px solid;cursor:pointer;display:block;position:relative;z-index:10}
+
+/* color variants */
+.v-weather .svc-icon{background:rgba(59,130,246,0.15);color:#60A5FA}
+.v-weather .pill{background:rgba(59,130,246,0.1);color:#93C5FD;border:1px solid rgba(59,130,246,0.2)}
+.v-weather .svc-btn.s{background:rgba(59,130,246,0.1);color:#60A5FA;border-color:rgba(59,130,246,0.25)}
+.v-weather .svc-btn.s:hover{background:rgba(59,130,246,0.2)}
+.v-alert .svc-icon{background:rgba(239,68,68,0.15);color:#F87171}
+.v-alert .pill{background:rgba(239,68,68,0.1);color:#FCA5A5;border:1px solid rgba(239,68,68,0.2)}
+.v-alert .svc-btn.s{background:rgba(239,68,68,0.1);color:#F87171;border-color:rgba(239,68,68,0.25)}
+.v-alert .svc-btn.s:hover{background:rgba(239,68,68,0.2)}
+.v-mob .svc-icon{background:rgba(139,92,246,0.15);color:#A78BFA}
+.v-mob .pill{background:rgba(139,92,246,0.1);color:#C4B5FD;border:1px solid rgba(139,92,246,0.2)}
+.v-mob .svc-btn.s{background:rgba(139,92,246,0.1);color:#A78BFA;border-color:rgba(139,92,246,0.25)}
+.v-mob .svc-btn.s:hover{background:rgba(139,92,246,0.2)}
+.v-ai .svc-icon{background:rgba(6,182,212,0.15);color:#22D3EE}
+.v-ai .pill{background:rgba(6,182,212,0.1);color:#67E8F9;border:1px solid rgba(6,182,212,0.2)}
+.v-ai .svc-btn.s{background:rgba(6,182,212,0.1);color:#22D3EE;border-color:rgba(6,182,212,0.25)}
+.v-ai .svc-btn.s:hover{background:rgba(6,182,212,0.2)}
+.svc-btn.h{background:rgba(34,197,94,0.08);color:#4ADE80;border-color:rgba(34,197,94,0.2)}
+.svc-btn.h:hover{background:rgba(34,197,94,0.15)}
+
+/* ── ENDPOINTS ── */
+.ep-wrap{margin-top:40px;background:var(--card);border:1px solid var(--border);border-radius:20px;overflow:hidden}
+.ep-row{display:grid;grid-template-columns:68px 1fr 1fr;align-items:center;gap:16px;padding:13px 24px;border-bottom:1px solid rgba(255,255,255,0.04);transition:background 0.15s}
+.ep-row:last-child{border-bottom:none}
+.ep-row:hover{background:rgba(124,58,237,0.04)}
+.badge-get{background:rgba(6,182,212,0.12);color:#22D3EE;padding:3px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:var(--mono);letter-spacing:0.04em;text-align:center}
+.badge-post{background:rgba(34,197,94,0.12);color:#4ADE80;padding:3px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:var(--mono);text-align:center}
+.ep-path{font-family:var(--mono);font-size:12px;color:var(--text)}
+.ep-path em{color:var(--c2);font-style:normal}
+.ep-desc{font-size:12px;color:var(--text3);text-align:right}
+
+/* ── INFRA ── */
+.infra-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-top:40px}
+.infra{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:22px;transition:all 0.2s}
+.infra:hover{border-color:var(--border2)}
+.infra-head{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.infra-emoji{width:40px;height:40px;border-radius:12px;background:rgba(255,255,255,0.04);display:flex;align-items:center;justify-content:center;font-size:20px}
+.infra-name{font-size:14px;font-weight:700}
+.infra-port{font-family:var(--mono);font-size:11px;color:var(--text3)}
+.infra-desc{font-size:12px;color:var(--text2);line-height:1.6;margin-bottom:14px}
+.infra-link{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:8px;font-size:12px;font-weight:600;text-decoration:none;background:rgba(255,255,255,0.05);color:var(--text2);border:1px solid rgba(255,255,255,0.08);transition:all 0.2s}
+.infra-link:hover{background:rgba(255,255,255,0.1);color:var(--text)}
+
+/* ── TECH ── */
+.tech-wrap{display:flex;flex-wrap:wrap;gap:10px;margin-top:32px}
+.tech-chip{display:flex;align-items:center;gap:7px;padding:8px 16px;border-radius:12px;font-size:13px;font-weight:500;background:var(--card);border:1px solid var(--border);color:var(--text2);transition:all 0.2s}
+.tech-chip:hover{border-color:rgba(124,58,237,0.4);color:var(--text);background:rgba(124,58,237,0.06)}
+.tech-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+
+/* ── TEAM ── */
+.team-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-top:32px}
+.member{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px;display:flex;align-items:center;gap:14px;transition:all 0.2s}
+.member:hover{border-color:var(--border2);transform:translateY(-2px)}
+.avatar{width:44px;height:44px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;flex-shrink:0}
+.m-name{font-size:13px;font-weight:700;margin-bottom:3px}
+.m-rm{font-family:var(--mono);font-size:11px;color:var(--text3)}
+
+/* ── FOOTER ── */
+footer{position:relative;z-index:1;padding:32px 24px;text-align:center;border-top:1px solid var(--border)}
+footer p{font-size:13px;color:var(--text3)}
+footer a{color:var(--text2);text-decoration:none}
+footer a:hover{color:var(--c2)}
+
+/* ── DIVIDER ── */
+.sec-divider{height:1px;background:linear-gradient(90deg,transparent,var(--border),transparent);margin:0 24px}
+</style>
+</head>
+<body>
+<div class="orb orb1"></div>
+<div class="orb orb2"></div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">
+    <svg viewBox="0 0 32 32" fill="none">
+      <rect width="32" height="32" rx="10" fill="url(#lg)"/>
+      <defs><linearGradient id="lg" x1="0" y1="0" x2="32" y2="32"><stop stop-color="#7C3AED"/><stop offset="1" stop-color="#06B6D4"/></linearGradient></defs>
+      <path d="M8 22 L12 14 L16 18 L20 10 L24 16" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <circle cx="24" cy="16" r="2.5" fill="white"/>
+    </svg>
+    <span class="nav-logo-text">Urban<span>Sense</span></span>
+  </div>
+  <div class="nav-badge">SISTEMA ONLINE</div>
+  <div class="nav-links">
+    <a href="https://github.com/Yuri-t0/urbansense-api" target="_blank">GitHub</a>
+    <a href="http://127.0.0.1:15672" target="_blank">RabbitMQ</a>
+    <a href="http://localhost:8080/swagger-ui.html" target="_blank" class="nav-cta">Ver API</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-eyebrow">
+    <svg viewBox="0 0 14 14" fill="none"><path d="M7 1L8.5 5H13L9.5 7.5L11 12L7 9L3 12L4.5 7.5L1 5H5.5L7 1Z" fill="currentColor"/></svg>
+    Plataforma de Inteligência Urbana
+  </div>
+  <h1>
+    <span class="word1">Urban</span>
+    <span class="word2">Sense</span>
+  </h1>
+  <p class="hero-sub">Conecta <strong>dados climáticos</strong>, <strong>mobilidade urbana</strong> e <strong>inteligência artificial</strong> para prever impactos reais no dia a dia dos cidadãos de São Paulo.</p>
+  <div class="hero-actions">
+    <a href="http://localhost:8080/swagger-ui.html" target="_blank" class="btn btn-violet">Documentação da API</a>
+    <a href="http://localhost:8083/swagger-ui.html" target="_blank" class="btn btn-cyan">Assistente IA</a>
+    <a href="https://github.com/Yuri-t0/urbansense-api" target="_blank" class="btn btn-ghost">GitHub</a>
+  </div>
+  <div class="hero-stats">
+    <div class="hero-stat"><div class="hs-num">4</div><div class="hs-label">Microsserviços</div></div>
+    <div class="hero-stat"><div class="hs-num">12</div><div class="hs-label">Linhas SP</div></div>
+    <div class="hero-stat"><div class="hs-num">4</div><div class="hs-label">Bancos</div></div>
+    <div class="hero-stat"><div class="hs-num">RAG</div><div class="hs-label">Spring AI</div></div>
+  </div>
+</div>
+
+<div class="sec-divider"></div>
+
+<!-- SERVIÇOS -->
+<section>
+<div class="container">
+  <div class="sec-label">Arquitetura</div>
+  <h2 class="sec-title">Microsserviços</h2>
+  <p class="sec-sub">Quatro serviços independentes, cada um com seu próprio banco de dados, responsabilidade única e Swagger.</p>
+  <div class="services-grid">
+
+    <div class="svc v-weather">
+      <div class="svc-top">
+        <div class="svc-icon">🌤️</div>
+        <span class="svc-port">:8080</span>
+      </div>
+      <h3>Serviço de Clima</h3>
+      <p class="svc-desc">Dados climáticos em tempo real via OpenWeather, histórico de precipitações e análise de risco de chuva por horário.</p>
+      <div class="svc-pills"><span class="pill">OpenWeather</span><span class="pill">Cache</span><span class="pill">Feign</span></div>
+      <div class="svc-btns">
+        <a href="http://localhost:8080/swagger-ui.html" target="_blank" class="svc-btn s">Swagger</a>
+        <a href="http://localhost:8080/actuator/health" target="_blank" class="svc-btn h">Health</a>
+      </div>
+    </div>
+
+    <div class="svc v-alert">
+      <div class="svc-top">
+        <div class="svc-icon">⚠️</div>
+        <span class="svc-port">:8081</span>
+      </div>
+      <h3>Serviço de Alertas</h3>
+      <p class="svc-desc">Geração automática de alertas urbanos com regras de negócio, publicação via RabbitMQ e Dead Letter Queue.</p>
+      <div class="svc-pills"><span class="pill">RabbitMQ</span><span class="pill">DLQ</span><span class="pill">HATEOAS</span></div>
+      <div class="svc-btns">
+        <a href="http://localhost:8081/swagger-ui.html" target="_blank" class="svc-btn s">Swagger</a>
+        <a href="http://localhost:8081/actuator/health" target="_blank" class="svc-btn h">Health</a>
+      </div>
+    </div>
+
+    <div class="svc v-mob">
+      <div class="svc-top">
+        <div class="svc-icon">🚇</div>
+        <span class="svc-port">:8082</span>
+      </div>
+      <h3>Serviço de Mobilidade</h3>
+      <p class="svc-desc">Análise de risco climático nas 12 linhas de metrô e trem de São Paulo com histórico de vulnerabilidade.</p>
+      <div class="svc-pills"><span class="pill">12 Linhas SP</span><span class="pill">Histórico</span><span class="pill">Risco</span></div>
+      <div class="svc-btns">
+        <a href="http://localhost:8082/swagger-ui.html" target="_blank" class="svc-btn s">Swagger</a>
+        <a href="http://localhost:8082/actuator/health" target="_blank" class="svc-btn h">Health</a>
+      </div>
+    </div>
+
+    <div class="svc v-ai">
+      <div class="svc-top">
+        <div class="svc-icon">🤖</div>
+        <span class="svc-port">:8083</span>
+      </div>
+      <h3>Assistente Inteligente</h3>
+      <p class="svc-desc">Assistente urbano com Spring AI — base de conhecimento RAG, Tooling em tempo real e servidor MCP.</p>
+      <div class="svc-pills"><span class="pill">RAG</span><span class="pill">Tooling</span><span class="pill">MCP</span></div>
+      <div class="svc-btns">
+        <a href="http://localhost:8083/swagger-ui.html" target="_blank" class="svc-btn s">Swagger</a>
+        <a href="http://localhost:8083/actuator/health" target="_blank" class="svc-btn h">Health</a>
+      </div>
+    </div>
+
+  </div>
+</div>
+</section>
+
+<div class="sec-divider"></div>
+
+<!-- ENDPOINTS -->
+<section>
+<div class="container">
+  <div class="sec-label">Gateway — porta 8000</div>
+  <h2 class="sec-title">Endpoints Unificados</h2>
+  <p class="sec-sub">Todos os microsserviços acessíveis por uma única entrada via Spring Cloud Gateway.</p>
+  <div class="ep-wrap">
+    <div class="ep-row"><span class="badge-get">GET</span><span class="ep-path">/api/v1/weather/current</span><span class="ep-desc">Clima atual de uma cidade</span></div>
+    <div class="ep-row"><span class="badge-get">GET</span><span class="ep-path">/api/v1/weather/rain-risk</span><span class="ep-desc">Análise histórica de risco</span></div>
+    <div class="ep-row"><span class="badge-get">GET</span><span class="ep-path">/api/v1/weather/heavy-rain</span><span class="ep-desc">Regiões com chuva intensa</span></div>
+    <div class="ep-row"><span class="badge-post">POST</span><span class="ep-path">/api/v1/alerts/evaluate</span><span class="ep-desc">Avaliação de alertas urbanos</span></div>
+    <div class="ep-row"><span class="badge-get">GET</span><span class="ep-path">/api/v1/alerts/city/<em>{city}</em></span><span class="ep-desc">Alertas ativos por cidade</span></div>
+    <div class="ep-row"><span class="badge-get">GET</span><span class="ep-path">/api/v1/alerts/type/<em>{type}</em></span><span class="ep-desc">Alertas filtrados por tipo</span></div>
+    <div class="ep-row"><span class="badge-get">GET</span><span class="ep-path">/api/v1/mobility/lines-at-risk</span><span class="ep-desc">Linhas de metrô em risco</span></div>
+    <div class="ep-row"><span class="badge-post">POST</span><span class="ep-path">/api/v1/advisor/ask</span><span class="ep-desc">Consulta ao assistente IA</span></div>
+    <div class="ep-row"><span class="badge-get">GET</span><span class="ep-path">/api/v1/advisor/daily-summary/<em>{city}</em></span><span class="ep-desc">Resumo diário com score</span></div>
+    <div class="ep-row"><span class="badge-get">GET</span><span class="ep-path">/api/v1/mcp/tools</span><span class="ep-desc">Catálogo MCP para LLMs externos</span></div>
+    <div class="ep-row"><span class="badge-post">POST</span><span class="ep-path">/api/v1/auth/login</span><span class="ep-desc">Autenticação JWT</span></div>
+  </div>
+</div>
+</section>
+
+<div class="sec-divider"></div>
+
+<!-- INFRA -->
+<section>
+<div class="container">
+  <div class="sec-label">Infraestrutura</div>
+  <h2 class="sec-title">Infraestrutura</h2>
+  <div class="infra-grid">
+    <div class="infra">
+      <div class="infra-head"><div class="infra-emoji">🐰</div><div><div class="infra-name">RabbitMQ</div><div class="infra-port">localhost:15672</div></div></div>
+      <p class="infra-desc">Mensageria com Topic Exchange e Dead Letter Queue. Filas: urban.alerts.queue e urban.alerts.dlq.</p>
+      <a href="http://127.0.0.1:15672" target="_blank" class="infra-link">Abrir painel →</a>
+    </div>
+    <div class="infra">
+      <div class="infra-head"><div class="infra-emoji">🐘</div><div><div class="infra-name">PostgreSQL</div><div class="infra-port">5432 · 5433 · 5434 · 5435</div></div></div>
+      <p class="infra-desc">4 bancos independentes, um por microsserviço, com versionamento via Flyway migrations.</p>
+    </div>
+    <div class="infra">
+      <div class="infra-head"><div class="infra-emoji">🦙</div><div><div class="infra-name">Ollama</div><div class="infra-port">localhost:11434</div></div></div>
+      <p class="infra-desc">Modelo local qwen2.5:0.5b — Spring AI sem dependência de APIs pagas externas.</p>
+      <a href="http://localhost:11434" target="_blank" class="infra-link">Status →</a>
+    </div>
+    <div class="infra">
+      <div class="infra-head"><div class="infra-emoji">🌤️</div><div><div class="infra-name">OpenWeather</div><div class="infra-port">api.openweathermap.org</div></div></div>
+      <p class="infra-desc">Dados climáticos em tempo real consumidos via Feign Client com fallback automático.</p>
+    </div>
+  </div>
+</div>
+</section>
+
+<div class="sec-divider"></div>
+
+<!-- TECH -->
+<section>
+<div class="container">
+  <div class="sec-label">Stack</div>
+  <h2 class="sec-title">Tecnologias Utilizadas</h2>
+  <div class="tech-wrap">
+    <span class="tech-chip"><span class="tech-dot" style="background:#F59E0B"></span>Spring Boot 3.3</span>
+    <span class="tech-chip"><span class="tech-dot" style="background:#EF4444"></span>Spring Security + JWT</span>
+    <span class="tech-chip"><span class="tech-dot" style="background:#7C3AED"></span>Spring AI</span>
+    <span class="tech-chip"><span class="tech-dot" style="background:#06B6D4"></span>Spring Cloud Gateway</span>
+    <span class="tech-chip"><span class="tech-dot" style="background:#F97316"></span>RabbitMQ + DLQ</span>
+    <span class="tech-chip"><span class="tech-dot" style="background:#336791"></span>PostgreSQL + Flyway</span>
+    <span class="tech-chip"><span class="tech-dot" style="background:#22C55E"></span>HATEOAS</span>
+    <span class="tech-chip"><span class="tech-dot" style="background:#16A34A"></span>Swagger / OpenAPI</span>
+    <span class="tech-chip"><span class="tech-dot" style="background:#8B5CF6"></span>Arquitetura Hexagonal</span>
+    <span class="tech-chip"><span class="tech-dot" style="background:#A855F7"></span>RAG + Tooling + MCP</span>
+    <span class="tech-chip"><span class="tech-dot" style="background:#0EA5E9"></span>Feign + Fallback</span>
+    <span class="tech-chip"><span class="tech-dot" style="background:#EAB308"></span>Cache Caffeine</span>
+    <span class="tech-chip"><span class="tech-dot" style="background:#2496ED"></span>Docker</span>
+    <span class="tech-chip"><span class="tech-dot" style="background:#14B8A6"></span>Ollama Local</span>
+  </div>
+</div>
+</section>
+
+<div class="sec-divider"></div>
+
+<!-- TEAM -->
+<section>
+<div class="container">
+  <div class="sec-label">Equipe</div>
+  <h2 class="sec-title">Nossa Equipe</h2>
+  <div class="team-grid">
+    <div class="member"><div class="avatar" style="background:rgba(124,58,237,0.2);color:#A78BFA">AY</div><div><div class="m-name">Adao Yuri</div><div class="m-rm">RM559223</div></div></div>
+    <div class="member"><div class="avatar" style="background:rgba(6,182,212,0.2);color:#22D3EE">JV</div><div><div class="m-name">João Vitor Santana</div><div class="m-rm">RM560781</div></div></div>
+    <div class="member"><div class="avatar" style="background:rgba(236,72,153,0.2);color:#F472B6">JR</div><div><div class="m-name">Julia Rodrigues</div><div class="m-rm">RM559781</div></div></div>
+    <div class="member"><div class="avatar" style="background:rgba(245,158,11,0.2);color:#FCD34D">FS</div><div><div class="m-name">Felipe Soares</div><div class="m-rm">RM559175</div></div></div>
+    <div class="member"><div class="avatar" style="background:rgba(34,197,94,0.2);color:#4ADE80">HS</div><div><div class="m-name">Henrique Souza</div><div class="m-rm">RM99742</div></div></div>
+  </div>
+</div>
+</section>
+
+
+<footer>
+  <p>UrbanSense — FIAP 2026 · Java Advanced · <a href="https://github.com/Yuri-t0/urbansense-api" target="_blank">github.com/Yuri-t0/urbansense-api</a></p>
+</footer>
+
+</body>
+</html>

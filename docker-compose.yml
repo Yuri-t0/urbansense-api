@@ -1,0 +1,150 @@
+version: '3.8'
+
+services:
+  # ── Bancos de Dados ──────────────────────────────────────────────────────
+  postgres-weather:
+    image: pgvector/pgvector:pg16   # já inclui extensão pgvector para AI
+    container_name: postgres-weather
+    environment:
+      POSTGRES_DB: urbanintel_weather
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata-weather:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  postgres-alert:
+    image: postgres:16
+    container_name: postgres-alert
+    environment:
+      POSTGRES_DB: urbanintel_alerts
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata-alert:/var/lib/postgresql/data
+
+  postgres-mobility:
+    image: postgres:16
+    container_name: postgres-mobility
+    environment:
+      POSTGRES_DB: urbanintel_mobility
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5435:5432"
+    volumes:
+      - pgdata-mobility:/var/lib/postgresql/data
+
+  postgres-ai:
+    image: pgvector/pgvector:pg16
+    container_name: postgres-ai
+    environment:
+      POSTGRES_DB: urbanintel_ai
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5434:5432"
+    volumes:
+      - pgdata-ai:/var/lib/postgresql/data
+
+  # ── Mensageria ────────────────────────────────────────────────────────────
+  rabbitmq:
+    image: rabbitmq:3.13-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"   # Management UI: http://localhost:15672
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ── Microsserviços ────────────────────────────────────────────────────────
+  weather-service:
+    build: ./weather-service
+    container_name: weather-service
+    ports:
+      - "8080:8080"
+    environment:
+      DB_USER: postgres
+      DB_PASS: postgres
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-weather:5432/urbanintel_weather
+      RABBIT_HOST: rabbitmq
+      OPENWEATHER_API_KEY: ${OPENWEATHER_API_KEY}
+      JWT_SECRET: ${JWT_SECRET:-urban-intel-super-secret-key-2024-must-be-long-enough}
+    depends_on:
+      postgres-weather:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  alert-service:
+    build: ./alert-service
+    container_name: alert-service
+    ports:
+      - "8081:8081"
+    environment:
+      DB_USER: postgres
+      DB_PASS: postgres
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-alert:5432/urbanintel_alerts
+      RABBIT_HOST: rabbitmq
+      WEATHER_SERVICE_URL: http://weather-service:8080
+      JWT_SECRET: ${JWT_SECRET:-urban-intel-super-secret-key-2024-must-be-long-enough}
+    depends_on:
+      - weather-service
+      - rabbitmq
+
+  mobility-service:
+    build: ./mobility-service
+    container_name: mobility-service
+    ports:
+      - "8082:8082"
+    environment:
+      DB_USER: postgres
+      DB_PASS: postgres
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-mobility:5432/urbanintel_mobility
+      RABBIT_HOST: rabbitmq
+      WEATHER_SERVICE_URL: http://weather-service:8080
+      JWT_SECRET: ${JWT_SECRET:-urban-intel-super-secret-key-2024-must-be-long-enough}
+    depends_on:
+      - weather-service
+      - rabbitmq
+
+  ai-advisor-service:
+    build: ./ai-advisor-service
+    container_name: ai-advisor-service
+    ports:
+      - "8083:8083"
+    environment:
+      DB_USER: postgres
+      DB_PASS: postgres
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-ai:5432/urbanintel_ai
+      RABBIT_HOST: rabbitmq
+      WEATHER_SERVICE_URL: http://weather-service:8080
+      ALERT_SERVICE_URL: http://alert-service:8081
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      JWT_SECRET: ${JWT_SECRET:-urban-intel-super-secret-key-2024-must-be-long-enough}
+    depends_on:
+      - alert-service
+      - postgres-ai
+
+volumes:
+  pgdata-weather:
+  pgdata-alert:
+  pgdata-mobility:
+  pgdata-ai:
+  rabbitmq-data:

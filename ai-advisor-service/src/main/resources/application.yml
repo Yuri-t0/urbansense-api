@@ -1,0 +1,48 @@
+server:
+  port: 8083
+
+spring:
+  application:
+    name: ai-advisor-service
+
+  datasource:
+    url: jdbc:postgresql://localhost:5434/urbanintel_ai
+    username: ${DB_USER:postgres}
+    password: ${DB_PASS:postgres}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+  rabbitmq:
+    host: ${RABBIT_HOST:localhost}
+    port: 5672
+    username: ${RABBIT_USER:guest}
+    password: ${RABBIT_PASS:guest}
+
+  ai:
+    ollama:
+      base-url: http://localhost:11434
+      chat:
+        options:
+          model: qwen2.5:0.5b
+          temperature: 0.3
+
+services:
+  weather:
+    url: ${WEATHER_SERVICE_URL:http://localhost:8080}
+  alert:
+    url: ${ALERT_SERVICE_URL:http://localhost:8081}
+
+jwt:
+  secret: ${JWT_SECRET:urban-intel-super-secret-key-2024-must-be-long-enough}
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html

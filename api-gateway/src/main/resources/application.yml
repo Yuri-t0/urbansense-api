@@ -1,0 +1,114 @@
+server:
+  port: 8000
+
+spring:
+  application:
+    name: api-gateway
+
+  cloud:
+    gateway:
+      routes:
+        - id: weather-api
+          uri: http://localhost:8080
+          predicates:
+            - Path=/api/v1/weather/**
+          filters:
+            - StripPrefix=0
+
+        - id: auth-api
+          uri: http://localhost:8080
+          predicates:
+            - Path=/api/v1/auth/**
+          filters:
+            - StripPrefix=0
+
+        - id: weather-swagger
+          uri: http://localhost:8080
+          predicates:
+            - Path=/weather-ui/**
+          filters:
+            - RewritePath=/weather-ui/(?<segment>.*), /swagger-ui/${segment}
+
+        - id: weather-docs
+          uri: http://localhost:8080
+          predicates:
+            - Path=/weather-docs/**
+          filters:
+            - RewritePath=/weather-docs/(?<segment>.*), /v3/api-docs/${segment}
+
+        - id: alert-api
+          uri: http://localhost:8081
+          predicates:
+            - Path=/api/v1/alerts/**
+          filters:
+            - StripPrefix=0
+
+        - id: alert-swagger
+          uri: http://localhost:8081
+          predicates:
+            - Path=/alert-ui/**
+          filters:
+            - RewritePath=/alert-ui/(?<segment>.*), /swagger-ui/${segment}
+
+        - id: alert-docs
+          uri: http://localhost:8081
+          predicates:
+            - Path=/alert-docs/**
+          filters:
+            - RewritePath=/alert-docs/(?<segment>.*), /v3/api-docs/${segment}
+
+        - id: mobility-api
+          uri: http://localhost:8082
+          predicates:
+            - Path=/api/v1/mobility/**
+          filters:
+            - StripPrefix=0
+
+        - id: mobility-swagger
+          uri: http://localhost:8082
+          predicates:
+            - Path=/mobility-ui/**
+          filters:
+            - RewritePath=/mobility-ui/(?<segment>.*), /swagger-ui/${segment}
+
+        - id: mobility-docs
+          uri: http://localhost:8082
+          predicates:
+            - Path=/mobility-docs/**
+          filters:
+            - RewritePath=/mobility-docs/(?<segment>.*), /v3/api-docs/${segment}
+
+        - id: ai-api
+          uri: http://localhost:8083
+          predicates:
+            - Path=/api/v1/advisor/**,/api/v1/mcp/**
+          filters:
+            - StripPrefix=0
+
+        - id: ai-swagger
+          uri: http://localhost:8083
+          predicates:
+            - Path=/ai-ui/**
+          filters:
+            - RewritePath=/ai-ui/(?<segment>.*), /swagger-ui/${segment}
+
+        - id: ai-docs
+          uri: http://localhost:8083
+          predicates:
+            - Path=/ai-docs/**
+          filters:
+            - RewritePath=/ai-docs/(?<segment>.*), /v3/api-docs/${segment}
+
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOriginPatterns: "*"
+            allowedMethods: "*"
+            allowedHeaders: "*"
+            allowCredentials: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,gateway
